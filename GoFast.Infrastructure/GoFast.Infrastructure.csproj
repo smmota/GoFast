@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="7.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GoFast.Application\GoFast.Application.csproj" />
+    <ProjectReference Include="..\GoFast.Domain.Core\GoFast.Domain.Core.csproj" />
+    <ProjectReference Include="..\GoFast.Domain.Services\GoFast.Domain.Services.csproj" />
+    <ProjectReference Include="..\GoFast.Domain\GoFast.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
