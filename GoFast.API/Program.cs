@@ -6,6 +6,7 @@ using GoFast.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -105,7 +106,7 @@ app.MapPost("/login", (Login model, SqlContext context) =>
     });
 });
 
-app.MapPost("/uploadImage", (UploadImage model) =>
+app.MapPost("/uploadImage", (UploadImage model, ClaimsPrincipal user) =>
 {
     if (string.IsNullOrEmpty(model.Image))
         return Results.BadRequest(new
@@ -121,6 +122,6 @@ app.MapPost("/uploadImage", (UploadImage model) =>
     {
         urlImage = url
     });
-}).RequireAuthorization();
+}).RequireAuthorization(); //.RequireAuthorization("Admin");
 
 app.Run();

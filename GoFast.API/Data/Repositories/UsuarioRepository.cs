@@ -13,7 +13,8 @@ namespace GoFast.API.Data.Repositories
 
         public Usuario GetUsuarioByUserAndPassword(string userName, string password)
         {
-            return _sqlContext.Usuario.Where(x => x.LoginUser.ToLower() == userName && x.Senha == password).FirstOrDefault();
+            var users = _sqlContext.Usuario;
+            return users.Where(x => x.LoginUser.ToLower() == userName && x.Senha == password).FirstOrDefault();
         }
     }
 }
