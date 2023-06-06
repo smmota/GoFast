@@ -30,12 +30,12 @@ namespace GoFast.API.Data.Repositories
             return _sqlContext.Set<TEntity>().ToList();
         }
 
-        public TEntity GetById(int id)
+        public TEntity GetById(Guid id)
         {
             return _sqlContext.Set<TEntity>().Find(id);
         }
 
-        public void Remove(int id)
+        public void Remove(Guid id)
         {
             try
             {
@@ -64,6 +64,11 @@ namespace GoFast.API.Data.Repositories
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        internal object getBlobByID(Guid idBlob)
+        {
+            throw new NotImplementedException();
         }
     }
 }

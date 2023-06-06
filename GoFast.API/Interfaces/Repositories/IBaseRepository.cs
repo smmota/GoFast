@@ -12,10 +12,10 @@ namespace GoFast.API.Interfaces.Repositories
 
         void Update(TEntity obj);
 
-        void Remove(int id);
+        void Remove(Guid id);
 
         IEnumerable<TEntity> GetAll();
 
-        TEntity GetById(int id);
+        TEntity GetById(Guid id);
     }
 }

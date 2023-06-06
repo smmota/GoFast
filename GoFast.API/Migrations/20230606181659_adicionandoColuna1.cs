@@ -6,24 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GoFast.API.Migrations
 {
     /// <inheritdoc />
-    public partial class criandoTabelasv9 : Migration
+    public partial class adicionandoColuna1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "BlobStorage",
+                name: "Documentos",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    base64 = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IdAzure = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TipoDocumento = table.Column<int>(type: "int", nullable: false),
+                    Numero = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Expedicao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IdBlob = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Renovacao = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BlobStorage", x => x.Id);
+                    table.PrimaryKey("PK_Documentos", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -45,26 +47,20 @@ namespace GoFast.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Documentos",
+                name: "Usuario",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TipoDocumento = table.Column<int>(type: "int", nullable: false),
-                    Numero = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Expedicao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DocumentoBlob = table.Column<Guid>(name: "Documento.Blob", type: "uniqueidentifier", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Renovacao = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LoginUser = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Senha = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ativo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Documentos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Documentos_BlobStorage_Documento.Blob",
-                        column: x => x.DocumentoBlob,
-                        principalTable: "BlobStorage",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Usuario", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -75,14 +71,14 @@ namespace GoFast.API.Migrations
                     Placa = table.Column<string>(type: "nvarchar(7)", maxLength: 7, nullable: false),
                     Modelo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     AnoFabricacao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CarroDocumentoCarro = table.Column<Guid>(name: "Carro.DocumentoCarro", type: "uniqueidentifier", nullable: false)
+                    IdDocumentoRefCarro = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Carros", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Carros_Documentos_Carro.DocumentoCarro",
-                        column: x => x.CarroDocumentoCarro,
+                        name: "FK_Carros_Documentos_IdDocumentoRefCarro",
+                        column: x => x.IdDocumentoRefCarro,
                         principalTable: "Documentos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -96,45 +92,40 @@ namespace GoFast.API.Migrations
                     Nome = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Nascimento = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MotoristaEndereco = table.Column<Guid>(name: "Motorista.Endereco", type: "uniqueidentifier", nullable: false),
-                    MotoristaCarro = table.Column<Guid>(name: "Motorista.Carro", type: "uniqueidentifier", nullable: false)
+                    IdEnderecoRefMotorista = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IdCarroRefMotorista = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Motorista", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Motorista_Carros_Motorista.Carro",
-                        column: x => x.MotoristaCarro,
+                        name: "FK_Motorista_Carros_IdCarroRefMotorista",
+                        column: x => x.IdCarroRefMotorista,
                         principalTable: "Carros",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Motorista_Endereco_Motorista.Endereco",
-                        column: x => x.MotoristaEndereco,
+                        name: "FK_Motorista_Endereco_IdEnderecoRefMotorista",
+                        column: x => x.IdEnderecoRefMotorista,
                         principalTable: "Endereco",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Carros_Carro.DocumentoCarro",
+                name: "IX_Carros_IdDocumentoRefCarro",
                 table: "Carros",
-                column: "Carro.DocumentoCarro");
+                column: "IdDocumentoRefCarro");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Documentos_Documento.Blob",
-                table: "Documentos",
-                column: "Documento.Blob");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Motorista_Motorista.Carro",
+                name: "IX_Motorista_IdCarroRefMotorista",
                 table: "Motorista",
-                column: "Motorista.Carro");
+                column: "IdCarroRefMotorista");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Motorista_Motorista.Endereco",
+                name: "IX_Motorista_IdEnderecoRefMotorista",
                 table: "Motorista",
-                column: "Motorista.Endereco");
+                column: "IdEnderecoRefMotorista");
         }
 
         /// <inheritdoc />
@@ -144,6 +135,9 @@ namespace GoFast.API.Migrations
                 name: "Motorista");
 
             migrationBuilder.DropTable(
+                name: "Usuario");
+
+            migrationBuilder.DropTable(
                 name: "Carros");
 
             migrationBuilder.DropTable(
@@ -151,9 +145,6 @@ namespace GoFast.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Documentos");
-
-            migrationBuilder.DropTable(
-                name: "BlobStorage");
         }
     }
 }

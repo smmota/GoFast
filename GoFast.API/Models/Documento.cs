@@ -1,4 +1,4 @@
-﻿using GoFast.API.Enums;
+﻿using GoFast.API.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +17,20 @@ namespace GoFast.API.Models
         [Required]
         public DateTime Expedicao { get; set; }
         [Required]
-        [ForeignKey("Documento.Blob")]
-        public BlobStorage Blob { get; set; }
+        [ForeignKey("BlobStorage")]
+        public Guid IdBlob { get; set; }
+
+        public Documento()
+        {
+        }
+
+        public Documento(Guid id, TipoDocumentoEnum tipoDocumento, string numero, DateTime expedicao, Guid idBlob)
+        {
+            Id = id;
+            TipoDocumento = tipoDocumento;
+            Numero = numero;
+            Expedicao = expedicao;
+            IdBlob = idBlob;
+        }
     }
 }

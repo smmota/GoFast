@@ -23,5 +23,21 @@ namespace GoFast.API.Models
         public string Estado { get; set; }
         [Required]
         public string Complemento { get; set; }
+
+        public Endereco(Guid id, string rua, int numero, string cEP, string bairro, string cidade, string estado, string complemento)
+        {
+            Id = id;
+            Rua = rua;
+            Numero = numero;
+            CEP = cEP;
+            Bairro = bairro;
+            Cidade = cidade;
+            Estado = estado;
+            Complemento = complemento;
+        }
+
+        public Endereco()
+        {
+        }
     }
 }

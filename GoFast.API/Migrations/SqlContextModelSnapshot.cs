@@ -22,34 +22,6 @@ namespace GoFast.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("GoFast.API.Models.BlobStorage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("IdAzure")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("base64")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BlobStorage");
-                });
-
             modelBuilder.Entity("GoFast.API.Models.Carro", b =>
                 {
                     b.Property<Guid>("Id")
@@ -59,7 +31,7 @@ namespace GoFast.API.Migrations
                     b.Property<DateTime>("AnoFabricacao")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("Carro.DocumentoCarro")
+                    b.Property<Guid>("IdDocumentoRefCarro")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Modelo")
@@ -74,7 +46,7 @@ namespace GoFast.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Carro.DocumentoCarro");
+                    b.HasIndex("IdDocumentoRefCarro");
 
                     b.ToTable("Carros");
                 });
@@ -89,11 +61,11 @@ namespace GoFast.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("Documento.Blob")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("Expedicao")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IdBlob")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Numero")
                         .IsRequired()
@@ -104,8 +76,6 @@ namespace GoFast.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Documento.Blob");
 
                     b.ToTable("Documentos");
 
@@ -164,10 +134,10 @@ namespace GoFast.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid>("Motorista.Carro")
+                    b.Property<Guid>("IdCarroRefMotorista")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("Motorista.Endereco")
+                    b.Property<Guid>("IdEnderecoRefMotorista")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Nascimento")
@@ -180,9 +150,9 @@ namespace GoFast.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Motorista.Carro");
+                    b.HasIndex("IdCarroRefMotorista");
 
-                    b.HasIndex("Motorista.Endereco");
+                    b.HasIndex("IdEnderecoRefMotorista");
 
                     b.ToTable("Motorista");
                 });
@@ -233,35 +203,24 @@ namespace GoFast.API.Migrations
                 {
                     b.HasOne("GoFast.API.Models.DocumentoCarro", "DocumentoCarro")
                         .WithMany()
-                        .HasForeignKey("Carro.DocumentoCarro")
+                        .HasForeignKey("IdDocumentoRefCarro")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DocumentoCarro");
                 });
 
-            modelBuilder.Entity("GoFast.API.Models.Documento", b =>
-                {
-                    b.HasOne("GoFast.API.Models.BlobStorage", "Blob")
-                        .WithMany()
-                        .HasForeignKey("Documento.Blob")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Blob");
-                });
-
             modelBuilder.Entity("GoFast.API.Models.Motorista", b =>
                 {
                     b.HasOne("GoFast.API.Models.Carro", "Carro")
                         .WithMany()
-                        .HasForeignKey("Motorista.Carro")
+                        .HasForeignKey("IdCarroRefMotorista")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GoFast.API.Models.Endereco", "Endereco")
                         .WithMany()
-                        .HasForeignKey("Motorista.Endereco")
+                        .HasForeignKey("IdEnderecoRefMotorista")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

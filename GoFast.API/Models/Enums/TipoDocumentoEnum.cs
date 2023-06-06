@@ -1,4 +1,4 @@
-﻿namespace GoFast.API.Enums
+﻿namespace GoFast.API.Models.Enums
 {
     public enum TipoDocumentoEnum
     {
