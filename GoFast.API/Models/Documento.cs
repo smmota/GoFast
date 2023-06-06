@@ -1,4 +1,4 @@
-﻿using GoFast.API.Entities.Enum;
+﻿using GoFast.API.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +9,7 @@ namespace GoFast.API.Models
         [Key]
         [Required]
         public Guid Id { get; private set; }
-        [Required]
+        //[Required]
         public TipoDocumentoEnum TipoDocumento { get; set; }
         [Required]
         [MaxLength(30)]

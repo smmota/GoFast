@@ -82,8 +82,6 @@ app.MapPost("/login", (Login model, SqlContext context) =>
     UsuarioRepository usuarioRepository = new UsuarioRepository(context);
     var usuario = usuarioRepository.GetUsuarioByUserAndPassword(model.LoginUser, model.Senha);
 
-    //var usuario = new Usuario();
-
     if (usuario == null)
         return Results.NotFound(new
         {
@@ -95,8 +93,6 @@ app.MapPost("/login", (Login model, SqlContext context) =>
         {
             message = "Usuário bloqueado!"
         });
-
-    //var usuario = new Usuario();
 
     var token = TokenService.GenerateToken(usuario);
 
@@ -125,6 +121,6 @@ app.MapPost("/uploadImage", (UploadImage model) =>
     {
         urlImage = url
     });
-});
+}).RequireAuthorization();
 
 app.Run();
