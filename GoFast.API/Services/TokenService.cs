@@ -1,4 +1,5 @@
-﻿using GoFast.Application.Dtos;
+﻿using GoFast.API.Models;
+using GoFast.Application.Dtos;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,7 +9,7 @@ namespace GoFast.API.Services
 {
     public static class TokenService
     {
-        public static string GenerateToken(UsuarioDto usuario)
+        public static string GenerateToken(Usuario usuario)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(Settings.Secret);
@@ -16,7 +17,8 @@ namespace GoFast.API.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, usuario.LoginUser.ToString())
+                    new Claim(ClaimTypes.Name, usuario.LoginUser.ToString()),
+                    new Claim(ClaimTypes.Role, usuario.Role.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials =

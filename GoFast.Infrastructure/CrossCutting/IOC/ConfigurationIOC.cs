@@ -6,7 +6,6 @@ using GoFast.Application.Mappers.Interfaces;
 using GoFast.Domain.Core.Interfaces.Repositories;
 using GoFast.Domain.Core.Interfaces.Services;
 using GoFast.Domain.Services;
-using GoFast.Infrastructure.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +36,7 @@ namespace GoFast.Infrastructure.CrossCutting.IOC
 
             #region Repository
 
-            builder.RegisterType<UsuarioRepository>().As<IUsuarioRepository>();
+            //builder.RegisterType<UsuarioRepository>().As<IUsuarioRepository>();
 
             #endregion
 

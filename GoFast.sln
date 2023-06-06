@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Infrastructure", "4 - I
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 - Tests", "0 - Tests", "{36059D87-6C1C-47F2-9D98-3DA3C8C41ABC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoFast.Application", "GoFast.Application\GoFast.Application.csproj", "{7DAC24CC-A7F6-45A3-9072-5540A8ECE6E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoFast.Application", "GoFast.Application\GoFast.Application.csproj", "{7DAC24CC-A7F6-45A3-9072-5540A8ECE6E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoFast.Domain", "GoFast.Domain\GoFast.Domain.csproj", "{3C176BE2-8279-4B0E-88D2-0F244D8D5542}"
 EndProject
@@ -23,7 +23,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoFast.Domain.Core", "GoFas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoFast.Domain.Services", "GoFast.Domain.Services\GoFast.Domain.Services.csproj", "{04CF6774-E7DB-4A28-9FEB-90DCECB84BA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoFast.Infrastructure", "GoFast.Infrastructure\GoFast.Infrastructure.csproj", "{E385EA75-300D-4416-82F8-8EE501FCA056}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoFast.Infrastructure", "GoFast.Infrastructure\GoFast.Infrastructure.csproj", "{E385EA75-300D-4416-82F8-8EE501FCA056}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teste", "Teste\Teste.csproj", "{C53AA938-66D6-44FE-9E8D-CC917115BA62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,10 @@ Global
 		{E385EA75-300D-4416-82F8-8EE501FCA056}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E385EA75-300D-4416-82F8-8EE501FCA056}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E385EA75-300D-4416-82F8-8EE501FCA056}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C53AA938-66D6-44FE-9E8D-CC917115BA62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C53AA938-66D6-44FE-9E8D-CC917115BA62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C53AA938-66D6-44FE-9E8D-CC917115BA62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C53AA938-66D6-44FE-9E8D-CC917115BA62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{ABA149AF-CEF2-4365-B451-ECB894181C28} = {F1746A90-E25F-4719-B8F3-0F58D783DF51}
 		{04CF6774-E7DB-4A28-9FEB-90DCECB84BA8} = {F1746A90-E25F-4719-B8F3-0F58D783DF51}
 		{E385EA75-300D-4416-82F8-8EE501FCA056} = {D3170111-9222-43CC-9BC3-3F41ED37235A}
+		{C53AA938-66D6-44FE-9E8D-CC917115BA62} = {36059D87-6C1C-47F2-9D98-3DA3C8C41ABC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4189632-9F3D-476B-A334-FCF7089880DC}

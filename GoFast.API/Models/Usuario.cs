@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GoFast.Application.Dtos
+﻿namespace GoFast.API.Models
 {
-    public class UsuarioDto
+    public class Usuario
     {
         public int Id { get; set; }
         public string Nome { get; set; }
@@ -14,5 +8,6 @@ namespace GoFast.Application.Dtos
         public string Senha { get; set; }
         public string Role { get; set; }
         public bool Ativo { get; set; }
+
     }
 }
