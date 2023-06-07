@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -85,9 +86,13 @@ app.UseAuthorization();
 
 app.MapPost("/v1/cadastrarUsuario", (IUsuarioRepository usuarioRepository, UsuarioViewModel model) =>
 {
+    var hash = new Hash(SHA512.Create());
+    Guid guid = Guid.NewGuid();
+    var senhaCripto = hash.CriptografarSenha(model.Senha + guid.ToString());
+
     Usuario usuario = new Usuario()
     {
-        Id = Guid.NewGuid(),
+        Id = guid,
         Nome = model.Nome,
         LoginUser = model.LoginUser,
         Senha = model.Senha,
