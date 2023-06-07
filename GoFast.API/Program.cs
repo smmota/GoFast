@@ -88,14 +88,13 @@ app.MapPost("/v1/cadastrarUsuario", (IUsuarioRepository usuarioRepository, Usuar
 {
     var hash = new Hash(SHA512.Create());
     Guid guid = Guid.NewGuid();
-    var senhaCripto = hash.CriptografarSenha(model.Senha + guid.ToString());
 
     Usuario usuario = new Usuario()
     {
         Id = guid,
         Nome = model.Nome,
         LoginUser = model.LoginUser,
-        Senha = model.Senha,
+        Senha = hash.CriptografarSenha(model.Senha + guid.ToString()),
         Ativo = true,
         Role = "user"
     };
@@ -116,9 +115,18 @@ app.MapPost("/v1/login", (IUsuarioRepository usuarioRepository, LoginViewModel m
             message = "Informe o usuário e senha!"
         });
 
-    var usuario = usuarioRepository.GetUsuarioByUserAndPassword(model.LoginUser, model.Senha);
+    var usuario = usuarioRepository.GetUsuarioByLogin(model.LoginUser);
 
     if (usuario == null)
+        return Results.NotFound(new
+        {
+            message = "Usuário ou senha incorreto!"
+        });
+
+    var hash = new Hash(SHA512.Create());
+    var senhaDigitadaCripto = hash.CriptografarSenha(model.Senha + usuario.Id);
+
+    if (senhaDigitadaCripto != usuario.Senha)
         return Results.NotFound(new
         {
             message = "Usuário ou senha incorreto!"
@@ -139,7 +147,7 @@ app.MapPost("/v1/login", (IUsuarioRepository usuarioRepository, LoginViewModel m
         usuario = usuario,
         token = token
     });
-}).WithTags("Usuario");
+}).AllowAnonymous().WithTags("Usuario");
 
 #endregion
 
@@ -159,6 +167,11 @@ app.MapPost("/v1/uploadImage", (IBlobStorageRepository blobStorageRepository, Up
         var uploadService = new FileUpload(connBlobStorage);
         var blobClient = uploadService.UploadBase64Image(model.Imagem, container);
 
+        foreach (var item in user.Claims)
+        {
+            var teste = item;
+        }
+
         try
         {
             BlobStorage blobStorage = new BlobStorage()
@@ -167,7 +180,7 @@ app.MapPost("/v1/uploadImage", (IBlobStorageRepository blobStorageRepository, Up
                 Link = blobClient.Uri.AbsoluteUri,
                 base64 = "Teste",
                 Container = blobClient.BlobContainerName,
-                IdUsuario = user.Identity.Name,
+                //IdUsuario = user.Claims.Where(x => x.),
                 IdAzure = "Teste"
             };
 

@@ -16,8 +16,10 @@ namespace GoFast.API.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, usuario.LoginUser.ToString()),
-                    new Claim(ClaimTypes.Role, usuario.Role.ToString())
+                    new Claim(ClaimTypes.Sid, usuario.Id.ToString()),
+                    new Claim(ClaimTypes.Name, usuario.Nome.ToString()),
+                    new Claim(ClaimTypes.Role, usuario.Role.ToString()),
+                    new Claim(ClaimTypes.Email , usuario.LoginUser.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials =

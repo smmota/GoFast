@@ -27,21 +27,21 @@ namespace GoFast.API.Services
             return sb.ToString();
         }
 
-        public bool VerificarSenha(string senhaDigitada, string senhaCadastrada)
-        {
-            if (string.IsNullOrEmpty(senhaCadastrada))
-                throw new NullReferenceException("Cadastre uma senha.");
+        //public bool VerificarSenha(string senhaDigitada, string senhaCadastrada)
+        //{
+        //    if (string.IsNullOrEmpty(senhaCadastrada))
+        //        throw new NullReferenceException("Cadastre uma senha.");
 
-            var encryptedPassword = _algorithm.ComputeHash(Encoding.UTF8.GetBytes(senhaDigitada));
+        //    var encryptedPassword = _algorithm.ComputeHash(Encoding.UTF8.GetBytes(senhaDigitada));
 
-            var sb = new StringBuilder();
+        //    var sb = new StringBuilder();
 
-            foreach (var caractere in encryptedPassword)
-            {
-                sb.Append(caractere.ToString("X2"));
-            }
+        //    foreach (var caractere in encryptedPassword)
+        //    {
+        //        sb.Append(caractere.ToString("X2"));
+        //    }
 
-            return sb.ToString() == senhaCadastrada;
-        }
+        //    return sb.ToString() == senhaCadastrada;
+        //}
     }
 }

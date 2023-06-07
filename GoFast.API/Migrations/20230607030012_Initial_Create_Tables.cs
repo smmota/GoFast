@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GoFast.API.Migrations
 {
     /// <inheritdoc />
-    public partial class adicionandoColuna1 : Migration
+    public partial class Initial_Create_Tables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BlobStorage",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    base64 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdAzure = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Container = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdUsuario = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlobStorage", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Documentos",
                 columns: table => new
@@ -50,8 +67,7 @@ namespace GoFast.API.Migrations
                 name: "Usuario",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoginUser = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Senha = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -131,6 +147,9 @@ namespace GoFast.API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BlobStorage");
+
             migrationBuilder.DropTable(
                 name: "Motorista");
 

@@ -12,10 +12,16 @@ namespace GoFast.API.Data.Repositories
             _sqlContext = sqlContext;
         }
 
+        public Usuario GetUsuarioByLogin(string userName)
+        {
+            var users = _sqlContext.Usuario;
+            return users.Where(x => x.LoginUser.ToLower() == userName.ToLower()).FirstOrDefault();
+        }
+
         public Usuario GetUsuarioByUserAndPassword(string userName, string password)
         {
             var users = _sqlContext.Usuario;
-            return users.Where(x => x.LoginUser.ToLower() == userName && x.Senha == password).FirstOrDefault();
+            return users.Where(x => x.LoginUser.ToLower() == userName.ToLower() && x.Senha == password).FirstOrDefault();
         }
     }
 }
