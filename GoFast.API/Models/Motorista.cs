@@ -7,7 +7,7 @@ namespace GoFast.API.Models
     {
         [Key]
         [Required]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         [MaxLength(150)]

@@ -1,13 +1,17 @@
+using AutoMapper;
 using GoFast.API;
 using GoFast.API.Data;
+using GoFast.API.Data.Mappers;
 using GoFast.API.Data.Repositories;
 using GoFast.API.Interfaces.Repositories;
 using GoFast.API.Models;
+using GoFast.API.Models.InputModel;
 using GoFast.API.Models.ViewModels;
 using GoFast.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Security.Claims;
@@ -25,6 +29,8 @@ builder.Services.AddDbContext<SqlContext>(options => options.UseSqlServer(connec
 builder.Services.AddTransient<IMotoristaRepository, MotoristaRepository>();
 builder.Services.AddTransient<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddTransient<IBlobStorageRepository, BlobStorageRepository>();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddAuthentication(options =>
 {
@@ -50,7 +56,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.ResolveConflictingActions(x => x.First());
+});
 
 var app = builder.Build();
 
@@ -234,23 +243,42 @@ app.MapPost("/v1/deleteImage", (IBlobStorageRepository blobStorageRepository, De
 
 #region Motorista
 
-app.MapGet("v1/Motorista", (IMotoristaRepository motoristaRepository) =>
+app.MapGet("v1/GetAll", (IMotoristaRepository motoristaRepository, IMapper _mapper) =>
 {
-    return Results.Ok(motoristaRepository.GetAll());
+    var motoristaDM = motoristaRepository.GetAll();
+
+    if (motoristaDM != null)
+        return Results.Ok(_mapper.Map<List<MotoristaViewModel>>(motoristaDM));
+
+    return Results.NoContent();
 }).WithTags("Motorista");
 
-app.MapPost("v1/Motorista", (
-    IMotoristaRepository motoristaRepository,
-    MotoristaViewModel model) =>
+app.MapGet("v1/GetById", (IMotoristaRepository motoristaRepository,
+                          IMapper _mapper,
+                          Guid idMotorista) =>
 {
-    var motorista = model.MapTo();
+    var motoristaDM = motoristaRepository.GetMotoristaById(idMotorista);
 
-    motoristaRepository.Add(motorista);
+    if (motoristaDM != null)
+        return Results.Ok(_mapper.Map<MotoristaViewModel>(motoristaDM));
+
+    return Results.NoContent();
+}).WithTags("Motorista");
+
+app.MapPost("v1/Create", (
+    IMotoristaRepository motoristaRepository,
+    IMapper _mapper,
+    MotoristaInputModel model) =>
+{
+    var motoristaVM = _mapper.Map<MotoristaViewModel>(model);
+    var motoristaDM = _mapper.Map<Motorista>(motoristaVM);
+
+    motoristaRepository.Add(motoristaDM);
 
     return Results.Ok();
 }).WithTags("Motorista");
 
-app.MapDelete("v1/Motorista", (
+app.MapDelete("v1/DeleteById", (
     IMotoristaRepository motoristaRepository,
     Guid idMotorista) =>
 {
@@ -259,13 +287,14 @@ app.MapDelete("v1/Motorista", (
     return Results.Ok();
 }).WithTags("Motorista");
 
-app.MapPut("v1/Motorista", (
+app.MapPut("v1/Update", (
     IMotoristaRepository motoristaRepository,
+    IMapper _mapper,
     MotoristaViewModel model) =>
 {
-    var motorista = model.MapTo();
+    var motoristaDM = _mapper.Map<Motorista>(model);
 
-    //motoristaRepository.Update(motorista);
+    motoristaRepository.Update(motoristaDM);
 
     return Results.Ok();
 }).WithTags("Motorista");

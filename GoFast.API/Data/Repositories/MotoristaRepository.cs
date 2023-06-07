@@ -1,4 +1,5 @@
-﻿using GoFast.API.Interfaces.Repositories;
+﻿using AutoMapper;
+using GoFast.API.Interfaces.Repositories;
 using GoFast.API.Models;
 
 namespace GoFast.API.Data.Repositories
@@ -10,6 +11,11 @@ namespace GoFast.API.Data.Repositories
         public MotoristaRepository(SqlContext sqlContext) : base(sqlContext)
         {
             _sqlContext = sqlContext;
+        }
+
+        public Motorista GetMotoristaById(Guid id)
+        {
+            return _sqlContext.Motorista.Where(x => x.Id == id).FirstOrDefault();
         }
     }
 }
