@@ -4,6 +4,6 @@ namespace GoFast.API.Interfaces.Repositories
 {
     public interface IBlobStorageRepository : IBaseRepository<BlobStorage> 
     {
-        public List<BlobStorage> GetByIdUsuario(string idUsuario);
+        Task<List<BlobStorage>> GetByIdUsuario(string idUsuario);
     }
 }

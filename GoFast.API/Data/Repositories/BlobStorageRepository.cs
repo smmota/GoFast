@@ -1,5 +1,6 @@
 ﻿using GoFast.API.Interfaces.Repositories;
 using GoFast.API.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 
 namespace GoFast.API.Data.Repositories
@@ -13,9 +14,9 @@ namespace GoFast.API.Data.Repositories
             _sqlContext = sqlContext;
         }
 
-        public List<BlobStorage> GetByIdUsuario(string idUsuario)
+        public async Task<List<BlobStorage>> GetByIdUsuario(string idUsuario)
         {
-            return _sqlContext.BlobStorage.Where(x => x.IdUsuario == idUsuario).ToList();
+            return await _sqlContext.BlobStorage.Where(x => x.IdUsuario == idUsuario).ToListAsync();
         }
     }
 }

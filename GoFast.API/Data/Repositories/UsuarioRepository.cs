@@ -1,5 +1,6 @@
 ﻿using GoFast.API.Interfaces.Repositories;
 using GoFast.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GoFast.API.Data.Repositories
 {
@@ -12,16 +13,26 @@ namespace GoFast.API.Data.Repositories
             _sqlContext = sqlContext;
         }
 
-        public Usuario GetUsuarioByLogin(string userName)
+        public async Task<Usuario> GetUsuarioByLogin(string userName)
         {
             var users = _sqlContext.Usuario;
-            return users.Where(x => x.LoginUser.ToLower() == userName.ToLower()).FirstOrDefault();
+            return await users.Where(x => x.LoginUser.ToLower() == userName.ToLower()).FirstOrDefaultAsync();
         }
 
-        public Usuario GetUsuarioByUserAndPassword(string userName, string password)
+        public async Task<Usuario> GetUsuarioByUserAndPassword(string userName, string password)
+        {
+            //var users = _sqlContext.Usuario;
+            //return await users.Where(x => x.LoginUser.ToLower() == userName.ToLower() && x.Senha == password).FirstOrDefaultAsync();
+
+            return await _sqlContext.Usuario.Where(x => x.LoginUser.ToLower() == userName.ToLower() && x.Senha == password).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> VerificaSeUsuarioExiste(string userName)
         {
             var users = _sqlContext.Usuario;
-            return users.Where(x => x.LoginUser.ToLower() == userName.ToLower() && x.Senha == password).FirstOrDefault();
+            var user = await users.Where(x => x.LoginUser.ToLower() == userName.ToLower()).FirstOrDefaultAsync();
+
+            return user != null ? true : false;
         }
     }
 }

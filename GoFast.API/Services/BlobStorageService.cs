@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
+using GoFast.API.Interfaces.Services;
 using GoFast.API.Models;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -7,19 +8,19 @@ using System.Text.RegularExpressions;
 
 namespace GoFast.API.Services
 {
-    public class FileUpload
+    public class BlobStorageService : IBlobStorageService
     {
-        //private string conn = "DefaultEndpointsProtocol=https;AccountName=storagefase1;AccountKey=O468vEKmKkDelei7wSGbupOSSLeY5l0ztRaIArkNTcQ/2+0uznS7wUvZps16Bd/m8AQVZKMNSB0h+ASth+GoBg==;EndpointSuffix=core.windows.net";
         private readonly IConfiguration _configuration;
 
         private string _conn = string.Empty;
 
-        public FileUpload(string conn)
+        public BlobStorageService(IConfiguration configuration)
         {
+            var conn = configuration.GetConnectionString("connBlobStorage");
             _conn = conn;
         }
 
-        public BlobClient UploadBase64Image(string base64Image, string container)
+        public async Task<BlobClient> UploadBase64Image(string base64Image, string container)
         {
             //Gera um nome randomico para imagem
             var fileName = Guid.NewGuid().ToString() + ".jpg";
@@ -36,18 +37,18 @@ namespace GoFast.API.Services
             //Envia a imagem
             using (var stream = new MemoryStream(imageBytes))
             {
-                blobClient.Upload(stream);
+                await blobClient.UploadAsync(stream);
             }            
 
             //Retorna as informações da imagem
             return blobClient;
         }
 
-        public bool DeleteImage(BlobStorage blobStorage)
+        public async Task<bool> DeleteImage(BlobStorage blobStorage)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(_conn);
             BlobContainerClient cont = blobServiceClient.GetBlobContainerClient(blobStorage.Container);
-            return cont.GetBlobClient(blobStorage.Name).DeleteIfExists();
+            return await cont.GetBlobClient(blobStorage.Name).DeleteIfExistsAsync();
         }
     }
 }

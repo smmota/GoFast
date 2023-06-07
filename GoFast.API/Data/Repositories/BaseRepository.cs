@@ -12,12 +12,12 @@ namespace GoFast.API.Data.Repositories
             _sqlContext = sqlContext;
         }
 
-        public void Add(TEntity obj)
+        public async Task Add(TEntity obj)
         {
             try
             {
                 _sqlContext.Set<TEntity>().Add(obj);
-                _sqlContext.SaveChanges();
+                await _sqlContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -25,26 +25,26 @@ namespace GoFast.API.Data.Repositories
             }
         }
 
-        public IEnumerable<TEntity> GetAll()
+        public async Task<IEnumerable<TEntity>> GetAll()
         {
-            return _sqlContext.Set<TEntity>().ToList();
+            return await _sqlContext.Set<TEntity>().ToListAsync();
         }
 
-        public TEntity GetById(Guid id)
+        public async Task<TEntity> GetById(Guid id)
         {
-            return _sqlContext.Set<TEntity>().Find(id);
+            return await _sqlContext.Set<TEntity>().FindAsync(id);
         }
 
-        public void Remove(Guid id)
+        public async Task Remove(Guid id)
         {
             try
             {
-                var obj = GetById(id);
+                var obj = await GetById(id);
 
                 if (obj != null)
                 {
                     _sqlContext.Set<TEntity>().Remove(obj);
-                    _sqlContext.SaveChanges();
+                    await _sqlContext.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -53,27 +53,17 @@ namespace GoFast.API.Data.Repositories
             }
         }
 
-        public void Update(TEntity obj)
+        public async Task Update(TEntity obj)
         {
             try
             {
                 _sqlContext.Entry(obj).State = EntityState.Modified;
-                _sqlContext.SaveChanges();
+                await _sqlContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-
-        internal object getBlobByID(Guid idBlob)
-        {
-            throw new NotImplementedException();
-        }
-
-        //internal object GetUsuarioByUserAndPassword(string loginUser, string senha)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

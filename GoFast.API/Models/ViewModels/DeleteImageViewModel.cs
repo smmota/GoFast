@@ -2,6 +2,6 @@
 {
     public class DeleteImageViewModel
     {
-        public string urlImagem { get; set; }
+        public Guid IdBlob { get; set; }
     }
 }

@@ -1,30 +1,25 @@
 using GoFast.API;
 using GoFast.API.Data;
-using GoFast.API.Data.Repositories;
+using GoFast.API.Infrastructure.Configurations;
 using GoFast.API.Interfaces.Repositories;
+using GoFast.API.Interfaces.Services;
 using GoFast.API.Models;
 using GoFast.API.Models.ViewModels;
 using GoFast.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("database");
-var connBlobStorage = builder.Configuration.GetConnectionString("connBlobStorage");
 var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
 builder.Services.AddDbContext<SqlContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddTransient<IMotoristaRepository, MotoristaRepository>();
-builder.Services.AddTransient<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddTransient<IBlobStorageRepository, BlobStorageRepository>();
+builder.Services.DependencyMap();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -84,9 +79,14 @@ app.UseAuthorization();
 //    .WithName("Login")
 //    .WithTags("Usuario");
 
-app.MapPost("/v1/cadastrarUsuario", (IUsuarioRepository usuarioRepository, UsuarioViewModel model) =>
+app.MapPost("/v1/cadastrarUsuario", async (IUsuarioRepository usuarioRepository, IHashService hashService, UsuarioViewModel model) =>
 {
-    var hash = new Hash(SHA512.Create());
+    if (await usuarioRepository.VerificaSeUsuarioExiste(model.LoginUser))
+        return Results.Ok(new
+        {
+            message = "E-mail informado já está cadastrado!"
+        });
+
     Guid guid = Guid.NewGuid();
 
     Usuario usuario = new Usuario()
@@ -94,12 +94,12 @@ app.MapPost("/v1/cadastrarUsuario", (IUsuarioRepository usuarioRepository, Usuar
         Id = guid,
         Nome = model.Nome,
         LoginUser = model.LoginUser,
-        Senha = hash.CriptografarSenha(model.Senha + guid.ToString()),
+        Senha = hashService.CriptografarSenha(model.Senha + guid.ToString()),
         Ativo = true,
         Role = "user"
     };
 
-    usuarioRepository.Add(usuario);
+    await usuarioRepository.Add(usuario);
 
     return Results.Ok(new
     {
@@ -107,7 +107,33 @@ app.MapPost("/v1/cadastrarUsuario", (IUsuarioRepository usuarioRepository, Usuar
     });
 }).AllowAnonymous().WithTags("Usuario");
 
-app.MapPost("/v1/login", (IUsuarioRepository usuarioRepository, LoginViewModel model) =>
+app.MapPut("/v1/statusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
+{
+    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
+
+    if (usuario == null)
+        return Results.NotFound(new
+        {
+            message = "Usuário não cadastrado!"
+        });
+
+    usuario.Ativo = model.Ativo;
+
+    await usuarioRepository.Update(usuario);
+
+    if (!usuario.Ativo)
+        return Results.Ok(new
+        {
+            message = "Usuário bloqueado com sucesso!"
+        });
+    else
+        return Results.Ok(new
+        {
+            message = "Usuário desbloqueado com sucesso!"
+        });
+}).RequireAuthorization("Admin").WithTags("Usuario");
+
+app.MapPost("/v1/login", async (IUsuarioRepository usuarioRepository, IHashService hashService, LoginViewModel model) =>
 {
     if (string.IsNullOrEmpty(model.LoginUser) || string.IsNullOrEmpty(model.Senha))
         return Results.NotFound(new
@@ -115,16 +141,15 @@ app.MapPost("/v1/login", (IUsuarioRepository usuarioRepository, LoginViewModel m
             message = "Informe o usuário e senha!"
         });
 
-    var usuario = usuarioRepository.GetUsuarioByLogin(model.LoginUser);
+    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
 
     if (usuario == null)
         return Results.NotFound(new
         {
-            message = "Usuário ou senha incorreto!"
+            message = "Usuário não cadastrado!"
         });
 
-    var hash = new Hash(SHA512.Create());
-    var senhaDigitadaCripto = hash.CriptografarSenha(model.Senha + usuario.Id);
+    var senhaDigitadaCripto = hashService.CriptografarSenha(model.Senha + usuario.Id);
 
     if (senhaDigitadaCripto != usuario.Senha)
         return Results.NotFound(new
@@ -153,7 +178,7 @@ app.MapPost("/v1/login", (IUsuarioRepository usuarioRepository, LoginViewModel m
 
 #region Blob Storage
 
-app.MapPost("/v1/uploadImage", (IBlobStorageRepository blobStorageRepository, UploadImageViewModel model, ClaimsPrincipal user) =>
+app.MapPost("/v1/uploadImage", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, UploadImageViewModel model, ClaimsPrincipal user) =>
 {
     if (string.IsNullOrEmpty(model.Imagem))
         return Results.BadRequest(new
@@ -164,30 +189,32 @@ app.MapPost("/v1/uploadImage", (IBlobStorageRepository blobStorageRepository, Up
     try
     {
         var container = "data";
-        var uploadService = new FileUpload(connBlobStorage);
-        var blobClient = uploadService.UploadBase64Image(model.Imagem, container);
+        var blobClient = await blobStorageService.UploadBase64Image(model.Imagem, container);
 
-        foreach (var item in user.Claims)
-        {
-            var teste = item;
-        }
+        if(blobClient == null)
+            return Results.BadRequest(new
+            {
+                message = "Erro ao fazer upload da imagem."
+            });
 
         try
         {
             BlobStorage blobStorage = new BlobStorage()
             {
+                Id = Guid.NewGuid(),
                 Name = blobClient.Name,
                 Link = blobClient.Uri.AbsoluteUri,
                 base64 = "Teste",
                 Container = blobClient.BlobContainerName,
-                //IdUsuario = user.Claims.Where(x => x.),
+                IdUsuario = user.Claims.Where(x => x.Type.Contains("sid")).FirstOrDefault().Value,
                 IdAzure = "Teste"
             };
 
-            blobStorageRepository.Add(blobStorage);
+            await blobStorageRepository.Add(blobStorage);
 
             return Results.Ok(new
             {
+                id = blobStorage.Id,
                 urlImagem = blobClient.Uri.AbsoluteUri
             });
         }
@@ -209,16 +236,15 @@ app.MapPost("/v1/uploadImage", (IBlobStorageRepository blobStorageRepository, Up
 
 }).RequireAuthorization().WithTags("Blob Storage"); //.RequireAuthorization("Admin");
 
-app.MapPost("/v1/deleteImage", (IBlobStorageRepository blobStorageRepository, DeleteImageViewModel model, ClaimsPrincipal user) =>
+app.MapPost("/v1/deleteImage", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, DeleteImageViewModel model, ClaimsPrincipal user) =>
 {
-    if (string.IsNullOrEmpty(model.urlImagem))
+    if (model.IdBlob == null)
         return Results.BadRequest(new
         {
             message = "A url deve ser preenchida!"
         });
 
-    var blobStorageList = blobStorageRepository.GetByIdUsuario(user.Identity.Name);
-    var blobStorage = blobStorageList.Where(x => x.Link == model.urlImagem).FirstOrDefault();
+    var blobStorage = await blobStorageRepository.GetById(model.IdBlob);
 
     if (blobStorage == null)
         return Results.NotFound(new
@@ -226,8 +252,7 @@ app.MapPost("/v1/deleteImage", (IBlobStorageRepository blobStorageRepository, De
             message = "A imagem não foi localizada!"
         });
 
-    var uploadService = new FileUpload(connBlobStorage);
-    bool result = uploadService.DeleteImage(blobStorage);
+    bool result = await blobStorageService.DeleteImage(blobStorage);
 
     if (!result)
         return Results.BadRequest(new
@@ -235,7 +260,7 @@ app.MapPost("/v1/deleteImage", (IBlobStorageRepository blobStorageRepository, De
             message = "Não foi possível remover o arquivo informado!"
         });
 
-    blobStorageRepository.Remove(blobStorage.Id);
+    await blobStorageRepository.Remove(blobStorage.Id);
 
     return Results.Ok(new
     {
@@ -247,32 +272,32 @@ app.MapPost("/v1/deleteImage", (IBlobStorageRepository blobStorageRepository, De
 
 #region Motorista
 
-app.MapGet("v1/Motorista", (IMotoristaRepository motoristaRepository) =>
+app.MapGet("v1/Motorista", async (IMotoristaRepository motoristaRepository) =>
 {
-    return Results.Ok(motoristaRepository.GetAll());
+    return Results.Ok(await motoristaRepository.GetAll());
 }).WithTags("Motorista");
 
-app.MapPost("v1/Motorista", (
+app.MapPost("v1/Motorista", async (
     IMotoristaRepository motoristaRepository,
     MotoristaViewModel model) =>
 {
     var motorista = model.MapTo();
 
-    motoristaRepository.Add(motorista);
+    await motoristaRepository.Add(motorista);
 
     return Results.Ok();
 }).WithTags("Motorista");
 
-app.MapDelete("v1/Motorista", (
+app.MapDelete("v1/Motorista", async (
     IMotoristaRepository motoristaRepository,
     Guid idMotorista) =>
 {
-    motoristaRepository.Remove(idMotorista);
+    await motoristaRepository.Remove(idMotorista);
 
     return Results.Ok();
 }).WithTags("Motorista");
 
-app.MapPut("v1/Motorista", (
+app.MapPut("v1/Motorista", async (
     IMotoristaRepository motoristaRepository,
     MotoristaViewModel model) =>
 {
