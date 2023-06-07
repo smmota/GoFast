@@ -7,13 +7,23 @@ namespace GoFast.API.Models
         [Key]
         [Required]
         public Guid Id { get; set; }
+        
         [MaxLength(200)]
         [Required]
         public string Name { get; set; }
-        [Required]
+                
         public string base64 { get; set; }
+
+        [Required]
         public string Link { get; set; }
+        
         public string IdAzure { get; set; }
+
+        [Required]
+        public string Container { get; set; }
+
+        [Required]
+        public string IdUsuario { get; set; }
 
         public BlobStorage(Guid id, string name, string base64)
         {

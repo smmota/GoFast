@@ -70,5 +70,10 @@ namespace GoFast.API.Data.Repositories
         {
             throw new NotImplementedException();
         }
+
+        //internal object GetUsuarioByUserAndPassword(string loginUser, string senha)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

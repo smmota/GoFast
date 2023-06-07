@@ -12,6 +12,7 @@ namespace GoFast.API.Data
         public DbSet<Carro> Carros { get; set; }
         public DbSet<Documento> Documentos { get; set; }
         public DbSet<Endereco> Endereco { get; set; }
+        public DbSet<BlobStorage> BlobStorage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

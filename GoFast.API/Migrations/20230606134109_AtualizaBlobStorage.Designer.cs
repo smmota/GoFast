@@ -4,6 +4,7 @@ using GoFast.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFast.API.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [Migration("20230606134109_AtualizaBlobStorage")]
+    partial class AtualizaBlobStorage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,7 +70,7 @@ namespace GoFast.API.Migrations
                     b.Property<DateTime>("AnoFabricacao")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("IdDocumentoRefCarro")
+                    b.Property<Guid>("Carro.DocumentoCarro")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Modelo")
@@ -82,7 +85,7 @@ namespace GoFast.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdDocumentoRefCarro");
+                    b.HasIndex("Carro.DocumentoCarro");
 
                     b.ToTable("Carros");
                 });
@@ -97,11 +100,11 @@ namespace GoFast.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("Documento.Blob")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("Expedicao")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("IdBlob")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Numero")
                         .IsRequired()
@@ -112,6 +115,8 @@ namespace GoFast.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Documento.Blob");
 
                     b.ToTable("Documentos");
 
@@ -170,10 +175,10 @@ namespace GoFast.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid>("IdCarroRefMotorista")
+                    b.Property<Guid>("Motorista.Carro")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdEnderecoRefMotorista")
+                    b.Property<Guid>("Motorista.Endereco")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Nascimento")
@@ -186,9 +191,9 @@ namespace GoFast.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdCarroRefMotorista");
+                    b.HasIndex("Motorista.Carro");
 
-                    b.HasIndex("IdEnderecoRefMotorista");
+                    b.HasIndex("Motorista.Endereco");
 
                     b.ToTable("Motorista");
                 });
@@ -239,24 +244,35 @@ namespace GoFast.API.Migrations
                 {
                     b.HasOne("GoFast.API.Models.DocumentoCarro", "DocumentoCarro")
                         .WithMany()
-                        .HasForeignKey("IdDocumentoRefCarro")
+                        .HasForeignKey("Carro.DocumentoCarro")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DocumentoCarro");
                 });
 
+            modelBuilder.Entity("GoFast.API.Models.Documento", b =>
+                {
+                    b.HasOne("GoFast.API.Models.BlobStorage", "Blob")
+                        .WithMany()
+                        .HasForeignKey("Documento.Blob")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blob");
+                });
+
             modelBuilder.Entity("GoFast.API.Models.Motorista", b =>
                 {
                     b.HasOne("GoFast.API.Models.Carro", "Carro")
                         .WithMany()
-                        .HasForeignKey("IdCarroRefMotorista")
+                        .HasForeignKey("Motorista.Carro")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GoFast.API.Models.Endereco", "Endereco")
                         .WithMany()
-                        .HasForeignKey("IdEnderecoRefMotorista")
+                        .HasForeignKey("Motorista.Endereco")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
