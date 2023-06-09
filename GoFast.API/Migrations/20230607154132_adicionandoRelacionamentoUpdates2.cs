@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GoFast.API.Migrations
 {
     /// <inheritdoc />
-    public partial class adicionandoColuna1 : Migration
+    public partial class adicionandoRelacionamentoUpdates2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BlobStorage",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    base64 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdAzure = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Container = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdUsuario = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlobStorage", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Documentos",
                 columns: table => new
@@ -35,7 +52,7 @@ namespace GoFast.API.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Rua = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Numero = table.Column<int>(type: "int", nullable: false),
-                    CEP = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    CEP = table.Column<string>(type: "nvarchar(9)", maxLength: 9, nullable: false),
                     Bairro = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Cidade = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -50,8 +67,7 @@ namespace GoFast.API.Migrations
                 name: "Usuario",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoginUser = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Senha = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -81,6 +97,7 @@ namespace GoFast.API.Migrations
                         column: x => x.IdDocumentoRefCarro,
                         principalTable: "Documentos",
                         principalColumn: "Id",
+                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -103,12 +120,14 @@ namespace GoFast.API.Migrations
                         column: x => x.IdCarroRefMotorista,
                         principalTable: "Carros",
                         principalColumn: "Id",
+                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Motorista_Endereco_IdEnderecoRefMotorista",
                         column: x => x.IdEnderecoRefMotorista,
                         principalTable: "Endereco",
                         principalColumn: "Id",
+                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -131,6 +150,9 @@ namespace GoFast.API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BlobStorage");
+
             migrationBuilder.DropTable(
                 name: "Motorista");
 
