@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFast.API.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    [Migration("20230607030012_Initial_Create_Tables")]
-    partial class Initial_Create_Tables
+    [Migration("20230607154132_adicionandoRelacionamentoUpdates2")]
+    partial class adicionandoRelacionamentoUpdates2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -135,8 +135,8 @@ namespace GoFast.API.Migrations
 
                     b.Property<string>("CEP")
                         .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasMaxLength(9)
+                        .HasColumnType("nvarchar(9)");
 
                     b.Property<string>("Cidade")
                         .IsRequired()

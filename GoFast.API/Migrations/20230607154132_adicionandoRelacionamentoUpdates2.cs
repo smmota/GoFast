@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace GoFast.API.Migrations
 {
-    /// <inheritdoc />
-    public partial class Initial_Create_Tables : Migration
+    public partial class adicionandoRelacionamentoUpdates2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,7 +51,7 @@ namespace GoFast.API.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Rua = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Numero = table.Column<int>(type: "int", nullable: false),
-                    CEP = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    CEP = table.Column<string>(type: "nvarchar(9)", maxLength: 9, nullable: false),
                     Bairro = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Cidade = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -97,6 +96,7 @@ namespace GoFast.API.Migrations
                         column: x => x.IdDocumentoRefCarro,
                         principalTable: "Documentos",
                         principalColumn: "Id",
+                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -119,12 +119,14 @@ namespace GoFast.API.Migrations
                         column: x => x.IdCarroRefMotorista,
                         principalTable: "Carros",
                         principalColumn: "Id",
+                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Motorista_Endereco_IdEnderecoRefMotorista",
                         column: x => x.IdEnderecoRefMotorista,
                         principalTable: "Endereco",
                         principalColumn: "Id",
+                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                 });
 

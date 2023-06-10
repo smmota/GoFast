@@ -6,14 +6,14 @@ namespace GoFast.API.Models
     {
         [Key]
         [Required]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public string Rua { get; set; }
         [Required]
         [Range(0, 20000)]
         public int Numero { get; set; }
         [Required]
-        [MaxLength(8)]
+        [MaxLength(9)]
         public string CEP { get; set; }
         [Required]
         public string Bairro { get; set; }
