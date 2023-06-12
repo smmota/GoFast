@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace GoFast.API.Migrations
 {
-    public partial class adicionandoRelacionamentoUpdates2 : Migration
+    /// <inheritdoc />
+    public partial class adicionandoRelacionamento1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -96,7 +97,6 @@ namespace GoFast.API.Migrations
                         column: x => x.IdDocumentoRefCarro,
                         principalTable: "Documentos",
                         principalColumn: "Id",
-                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -119,14 +119,12 @@ namespace GoFast.API.Migrations
                         column: x => x.IdCarroRefMotorista,
                         principalTable: "Carros",
                         principalColumn: "Id",
-                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Motorista_Endereco_IdEnderecoRefMotorista",
                         column: x => x.IdEnderecoRefMotorista,
                         principalTable: "Endereco",
                         principalColumn: "Id",
-                        onUpdate: ReferentialAction.Cascade,
                         onDelete: ReferentialAction.Cascade);
                 });
 

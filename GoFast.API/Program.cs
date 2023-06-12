@@ -282,7 +282,7 @@ app.MapPost("/v1/deleteImage", async (IBlobStorageRepository blobStorageReposito
 
 app.MapGet("v1/GetAll", async (IMotoristaRepository motoristaRepository, IMapper _mapper) =>
 {
-    var motoristaDM = await motoristaRepository.GetAll();
+    var motoristaDM = await motoristaRepository.GetAllMotoristas();
 
     if (motoristaDM != null)
         return Results.Ok(_mapper.Map<List<MotoristaViewModel>>(motoristaDM));

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFast.API.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    [Migration("20230607154132_adicionandoRelacionamentoUpdates2")]
-    partial class adicionandoRelacionamentoUpdates2
+    [Migration("20230612142734_adicionandoRelacionamento1")]
+    partial class adicionandoRelacionamento1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

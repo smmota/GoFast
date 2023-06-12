@@ -20,9 +20,9 @@ namespace GoFast.API.Models
         [Required]
         public DateTime AnoFabricacao { get; set; }
 
-        [ForeignKey("DocumentoCarro")]
         public Guid IdDocumentoRefCarro { get; set; }
 
+        [ForeignKey("IdDocumentoRefCarro")]
         public DocumentoCarro DocumentoCarro { get; set; }
 
 

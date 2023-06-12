@@ -20,26 +20,31 @@ namespace GoFast.API.Models
         [Required]
         public DateTime Nascimento { get; set; }
 
-        [ForeignKey("Endereco")]
         public Guid IdEnderecoRefMotorista { get; set; }
 
         [Required]
+        [ForeignKey("IdEnderecoRefMotorista")]
         public Endereco Endereco { get; set; }
 
-        [ForeignKey("Carro")]
         public Guid IdCarroRefMotorista { get; set; }
 
         [Required]
+        [ForeignKey("IdCarroRefMotorista")]
         public Carro Carro { get; set; }
 
-        public Motorista(Guid id, string nome, string email, DateTime nascimento)
+        public Motorista(Guid id, string nome, string email, DateTime nascimento, Endereco _endereco, Carro _carro)
         {
             Id = id;
             Nome = nome;
             Email = email;
             Nascimento = nascimento;
-            Endereco = new Endereco(new Guid(), "teste", 2, "teste", "teste", "teste", "teste", "teste");
-            Carro = new Carro(new Guid(), "teste", "teste", DateTime.Now, new DocumentoCarro(new Guid(), Enums.TipoDocumentoEnum.Renavam, "teste", DateTime.Now, new Guid(), DateTime.Now));
+            Endereco = _endereco;//new Endereco(new Guid(), "teste", 2, "teste", "teste", "teste", "teste", "teste");
+            Carro = _carro;//new Carro(new Guid(), "teste", "teste", DateTime.Now, new DocumentoCarro(new Guid(), Enums.TipoDocumentoEnum.Renavam, "teste", DateTime.Now, new Guid(), DateTime.Now));
+        }
+
+        public Motorista()
+        {
+
         }
     }
 }
