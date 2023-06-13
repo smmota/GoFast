@@ -11,7 +11,7 @@ public class MotoristaViewModel
 
     public string Email { get; set; }
 
-    public string Nascimento { get; set; }
+    public DateTime Nascimento { get; set; }
 
     public Guid IdEnderecoRefMotorista { get; set; }
 
