@@ -87,7 +87,7 @@ app.UseAuthorization();
 //    .WithName("Login")
 //    .WithTags("Usuario");
 
-app.MapPost("/v1/cadastrarUsuario", async (IUsuarioRepository usuarioRepository, IHashService hashService, UsuarioViewModel model) =>
+app.MapPost("/v1/CreateUsuario", async (IUsuarioRepository usuarioRepository, IHashService hashService, UsuarioViewModel model) =>
 {
     if (await usuarioRepository.VerificaSeUsuarioExiste(model.LoginUser))
         return Results.Ok(new
@@ -113,7 +113,7 @@ app.MapPost("/v1/cadastrarUsuario", async (IUsuarioRepository usuarioRepository,
     {
         message = $"Usuario {usuario.Nome} cadastrado com sucesso!"
     });
-}).AllowAnonymous().WithTags("Usuario");
+}).AllowAnonymous().WithName("CreateUsuario").WithTags("Usuario");
 
 app.MapPut("/v1/statusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
 {
@@ -139,7 +139,7 @@ app.MapPut("/v1/statusUsuario", async (IUsuarioRepository usuarioRepository, Usu
         {
             message = "Usuário desbloqueado com sucesso!"
         });
-}).RequireAuthorization("Admin").WithTags("Usuario");
+}).RequireAuthorization("Admin").WithName("UpdateUsuario").WithTags("Usuario");
 
 app.MapPost("/v1/login", async (IUsuarioRepository usuarioRepository, IHashService hashService, LoginViewModel model) =>
 {
@@ -180,7 +180,7 @@ app.MapPost("/v1/login", async (IUsuarioRepository usuarioRepository, IHashServi
         usuario = usuario,
         token = token
     });
-}).AllowAnonymous().WithTags("Usuario");
+}).AllowAnonymous().WithName("Login").WithTags("Usuario");
 
 #endregion
 
@@ -214,7 +214,8 @@ app.MapPost("/v1/uploadImage", async (IBlobStorageRepository blobStorageReposito
                 Link = blobClient.Uri.AbsoluteUri,
                 base64 = "Teste",
                 Container = blobClient.BlobContainerName,
-                IdUsuario = user.Claims.Where(x => x.Type.Contains("sid")).FirstOrDefault().Value,
+                //IdUsuario = user.Claims.Where(x => x.Type.Contains("sid")).FirstOrDefault().Value,
+                IdUsuario = "teste@teste.com",
                 IdAzure = "Teste"
             };
 
@@ -223,7 +224,7 @@ app.MapPost("/v1/uploadImage", async (IBlobStorageRepository blobStorageReposito
             return Results.Ok(new
             {
                 id = blobStorage.Id,
-                urlImagem = blobClient.Uri.AbsoluteUri
+                //urlImagem = blobClient.Uri.AbsoluteUri
             });
         }
         catch (Exception ex)
@@ -242,7 +243,7 @@ app.MapPost("/v1/uploadImage", async (IBlobStorageRepository blobStorageReposito
         });
     }
 
-}).RequireAuthorization().WithTags("Blob Storage"); //.RequireAuthorization("Admin");
+}).WithName("UploadImage").WithTags("Blob Storage"); //.RequireAuthorization("Admin"); .RequireAuthorization()
 
 app.MapPost("/v1/deleteImage", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, DeleteImageViewModel model, ClaimsPrincipal user) =>
 {
@@ -274,25 +275,39 @@ app.MapPost("/v1/deleteImage", async (IBlobStorageRepository blobStorageReposito
     {
         message = "Arquivo removido com sucesso!"
     });
-}).RequireAuthorization().WithTags("Blob Storage"); //.RequireAuthorization("Admin");
+}).RequireAuthorization().WithName("DeleteImage").WithTags("Blob Storage"); //.RequireAuthorization("Admin");
+
+app.MapGet("/v1/GetById", async (IBlobStorageRepository blobStorageRepository, IMapper _mapper, Guid idBlobStorage) =>
+{
+    if (string.IsNullOrEmpty(idBlobStorage.ToString()))
+        return Results.BadRequest(new
+        {
+            message = "Informe o id da imagem!"
+        });
+
+    var blobStorage = await blobStorageRepository.GetById(idBlobStorage);
+
+    if (blobStorage != null)
+        return Results.Ok(_mapper.Map<BlobStorageViewModel>(blobStorage));
+
+    return Results.NoContent();
+}).WithName("GetImageById").WithTags("Blob Storage");
 
 #endregion
 
 #region Motorista
 
-app.MapGet("v1/GetAll", async (IMotoristaRepository motoristaRepository, IMapper _mapper) =>
-{
-    var motoristaDM = await motoristaRepository.GetAllMotoristas();
+app.MapGet("/v1/GetAll", async (IMotoristaRepository motoristaRepository, IMapper _mapper) =>
+ {
+     var motoristaDM = await motoristaRepository.GetAllMotoristas();
 
-    if (motoristaDM != null)
+     if (motoristaDM != null)
         return Results.Ok(_mapper.Map<List<MotoristaViewModel>>(motoristaDM));
 
     return Results.NoContent();
-}).WithTags("Motorista");
+}).WithName("GetAllMotoristas").WithTags("Motorista");
 
-app.MapGet("v1/GetById", async (IMotoristaRepository motoristaRepository,
-                          IMapper _mapper,
-                          Guid idMotorista) =>
+app.MapGet("/v1/GetMotoristaById", async (IMotoristaRepository motoristaRepository, IMapper _mapper, Guid idMotorista) =>
 {
     var motoristaDM = await motoristaRepository.GetMotoristaById(idMotorista);
 
@@ -300,31 +315,31 @@ app.MapGet("v1/GetById", async (IMotoristaRepository motoristaRepository,
         return Results.Ok(_mapper.Map<MotoristaViewModel>(motoristaDM));
 
     return Results.NoContent();
-}).WithTags("Motorista");
+}).WithName("GetMotoristaById").WithTags("Motorista");
 
-app.MapPost("v1/Create", async (
-    IMotoristaRepository motoristaRepository,
-    IMapper _mapper,
-    MotoristaInputModel model) =>
+app.MapPost("/v1/Create", async (IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaInputModel model) =>
 {
     var motoristaVM = _mapper.Map<MotoristaViewModel>(model);
     var motoristaDM = _mapper.Map<Motorista>(motoristaVM);
 
     await motoristaRepository.Add(motoristaDM);
 
-    return Results.Ok();
-}).WithTags("Motorista");
+    return Results.Ok(new
+    {
+        motoristaDM.Id
+    });
+}).WithName("CreateMotorista").WithTags("Motorista");
 
-app.MapDelete("v1/DeleteById", async (
+app.MapDelete("/v1/DeleteById", async (
     IMotoristaRepository motoristaRepository,
     Guid idMotorista) =>
 {
     await motoristaRepository.Remove(idMotorista);
 
     return Results.Ok();
-}).WithTags("Motorista");
+}).WithName("DeleteMotorista").WithTags("Motorista");
 
-app.MapPut("v1/Update", async (
+app.MapPut("/v1/Update", async (
     IMotoristaRepository motoristaRepository,
     IMapper _mapper,
     MotoristaViewModel model) =>
@@ -334,7 +349,7 @@ app.MapPut("v1/Update", async (
     await motoristaRepository.Update(motoristaDM);
 
     return Results.Ok();
-}).WithTags("Motorista");
+}).WithName("UpdateMotorista").WithTags("Motorista");
 
 #endregion
 

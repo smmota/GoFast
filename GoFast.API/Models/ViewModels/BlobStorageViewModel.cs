@@ -8,8 +8,8 @@ namespace GoFast.API.Models.ViewModels
         [Required]
         public string Name { get; set; }
         [Required]
-        public string base64 { get; set; }
+        //public string base64 { get; set; }
         public string Link { get; set; }
-        public string IdAzure { get; set; }
+        //public string IdAzure { get; set; }
     }
 }
