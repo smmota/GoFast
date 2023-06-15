@@ -12,6 +12,8 @@ namespace GoFast.API.Models.ViewModels
 
         public string Expedicao { get; set; }
 
-        public Guid IdBlob { get; set; }
+        public Guid BlobId { get; set; }
+
+        public BlobStorageViewModel BlobStorage { get; set; }
     }
 }

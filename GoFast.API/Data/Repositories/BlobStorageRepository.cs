@@ -13,10 +13,5 @@ namespace GoFast.API.Data.Repositories
         {
             _sqlContext = sqlContext;
         }
-
-        public async Task<List<BlobStorage>> GetByIdUsuario(string idUsuario)
-        {
-            return await _sqlContext.BlobStorage.Where(x => x.IdUsuario == idUsuario).ToListAsync();
-        }
     }
 }

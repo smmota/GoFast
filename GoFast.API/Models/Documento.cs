@@ -16,21 +16,25 @@ namespace GoFast.API.Models
         public string Numero { get; set; }
         [Required]
         public DateTime Expedicao { get; set; }
-        [Required]
-        [ForeignKey("BlobStorage")]
-        public Guid IdBlob { get; set; }
+        //[Required]
+        
+        public Guid BlobId { get; set; }
+
+        [ForeignKey("BlobId")]
+        public BlobStorage? BlobStorage { get; set; }
 
         public Documento()
         {
         }
 
-        public Documento(Guid id, TipoDocumentoEnum tipoDocumento, string numero, DateTime expedicao, Guid idBlob)
+        public Documento(Guid id, TipoDocumentoEnum tipoDocumento, string numero, DateTime expedicao, BlobStorage blob)
         {
             Id = id;
             TipoDocumento = tipoDocumento;
             Numero = numero;
             Expedicao = expedicao;
-            IdBlob = idBlob;
+            //BlobId = blob.Id;
+            BlobStorage = blob;
         }
     }
 }
