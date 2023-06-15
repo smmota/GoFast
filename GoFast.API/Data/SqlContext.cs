@@ -17,6 +17,21 @@ namespace GoFast.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            //modelBuilder.ApplyConfigurationsFromAssembly(typeof(SqlContext).Assembly);
+            //modelBuilder.Entity<Usuario>().HasKey(t => t.Id);
+            //modelBuilder.Entity<Motorista>().HasKey(t => t.Id);
+            //modelBuilder.Entity<Carro>().HasKey(t => t.Id);
+
+            //modelBuilder.Entity<Documento>().HasKey(t => t.Id);
+            //modelBuilder.Entity<Documento>().HasMany(b => b.BlobStorage)
+            //    .With
+
+
+
+            //modelBuilder.Entity<Endereco>().HasKey(t => t.Id);
+            //modelBuilder.Entity<BlobStorage>().HasKey(t => t.Id);
+
         }
 
         public override int SaveChanges()

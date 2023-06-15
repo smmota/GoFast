@@ -16,8 +16,7 @@ namespace GoFast.API.Services
 
         public BlobStorageService(IConfiguration configuration)
         {
-            var conn = configuration.GetConnectionString("connBlobStorage");
-            _conn = conn;
+            _conn = configuration.GetConnectionString("connBlobStorage");
         }
 
         public async Task<BlobClient> UploadBase64Image(string base64Image, string container)

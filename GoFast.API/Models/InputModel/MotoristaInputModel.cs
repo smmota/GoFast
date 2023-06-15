@@ -21,5 +21,8 @@ namespace GoFast.API.Models.InputModel
 
         [Required]
         public CarroInputModel Carro { get; set; }
+
+        [Required]
+        public BlobInputModel Blob { get; set; }
     }
 }

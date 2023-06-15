@@ -12,8 +12,8 @@ namespace GoFast.API.Models
         {
         }
 
-        public DocumentoCarro(Guid id, TipoDocumentoEnum tipoDocumento, string numero, DateTime expedicao, Guid idBlob, DateTime renovacao)
-            : base(id, tipoDocumento, numero, expedicao, idBlob)
+        public DocumentoCarro(Guid id, TipoDocumentoEnum tipoDocumento, string numero, DateTime expedicao, Guid idBlob, DateTime renovacao, BlobStorage blob)
+            : base(id, tipoDocumento, numero, expedicao, blob)
         {
             Renovacao = renovacao;
         }

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Azure.Storage.Blobs;
 using GoFast.API;
 using GoFast.API.Data;
 using GoFast.API.Data.Repositories;
@@ -219,7 +220,7 @@ app.MapPost("/api/Usuario/login", async (IUsuarioRepository usuarioRepository, I
 
 #region Blob Storage
 
-app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, UploadImageViewModel model, ClaimsPrincipal user) =>
+app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, UploadImageViewModel model) =>
 {
     if (string.IsNullOrEmpty(model.Imagem))
         return Results.BadRequest(new
@@ -245,11 +246,7 @@ app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepos
                 Id = Guid.NewGuid(),
                 Name = blobClient.Name,
                 Link = blobClient.Uri.AbsoluteUri,
-                base64 = "Teste",
                 Container = blobClient.BlobContainerName,
-                //IdUsuario = user.Claims.Where(x => x.Type.Contains("sid")).FirstOrDefault().Value,
-                IdUsuario = "teste@teste.com",
-                IdAzure = "Teste"
             };
 
             await blobStorageRepository.Add(blobStorage);
@@ -257,7 +254,6 @@ app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepos
             return Results.Ok(new
             {
                 id = blobStorage.Id,
-                //urlImagem = blobClient.Uri.AbsoluteUri
             });
         }
         catch (Exception ex)
@@ -280,12 +276,12 @@ app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepos
     .RequireAuthorization()
     .WithTags("Imagem");
 
-app.MapPost("/api/Imaggem/Delete", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, DeleteImageViewModel model, ClaimsPrincipal user) =>
+app.MapPost("/api/Imaggem/Delete", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, DeleteImageViewModel model) =>
 {
     if (model.IdBlob == null)
         return Results.BadRequest(new
         {
-            message = "A url deve ser preenchida!"
+            message = "O id da imagem deve ser informado!"
         });
 
     var blobStorage = await blobStorageRepository.GetById(model.IdBlob);
@@ -296,9 +292,7 @@ app.MapPost("/api/Imaggem/Delete", async (IBlobStorageRepository blobStorageRepo
             message = "A imagem não foi localizada!"
         });
 
-    bool result = await blobStorageService.DeleteImage(blobStorage);
-
-    if (!result)
+    if (!await blobStorageService.DeleteImage(blobStorage))
         return Results.BadRequest(new
         {
             message = "Não foi possível remover o arquivo informado!"
@@ -361,10 +355,49 @@ app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaReposi
     .RequireAuthorization()
     .WithTags("Motorista");
 
-app.MapPost("/api/Motorista/Create", async (IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaInputModel model) =>
+app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaInputModel model) =>
 {
+    if (string.IsNullOrEmpty(model.Blob.ImagemBase64))
+        return Results.BadRequest(new
+        {
+            message = "O valor a imagem deve ser preenchido!"
+        });
+
+    BlobStorage blobStorage;
+    BlobClient blobClient;
+
+    try
+    {
+        var container = "data";
+        blobClient = await blobStorageService.UploadBase64Image(model.Blob.ImagemBase64, container);
+
+        if (blobClient == null)
+            return Results.BadRequest(new
+            {
+                message = "Erro ao fazer upload da imagem."
+            });
+
+        blobStorage = new BlobStorage()
+        {
+            Id = Guid.NewGuid(),
+            Name = blobClient.Name,
+            Link = blobClient.Uri.AbsoluteUri,
+            Container = blobClient.BlobContainerName,
+        };
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new
+        {
+            message = $"Erro ao fazer upload da imagem. {ex.Message}"
+        });
+    }
+
     var motoristaVM = _mapper.Map<MotoristaViewModel>(model);
     var motoristaDM = _mapper.Map<Motorista>(motoristaVM);
+
+    motoristaDM.Id = Guid.NewGuid();
+    motoristaDM.Carro.DocumentoCarro.BlobStorage = blobStorage;
 
     await motoristaRepository.Add(motoristaDM);
 
