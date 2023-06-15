@@ -9,7 +9,7 @@ namespace GoFast.API.Models.ViewModels
 
         public string Modelo { get; set; }
 
-        public string AnoFabricacao { get; set; }
+        public DateTime AnoFabricacao { get; set; }
 
         public DocumentoCarroViewModel DocumentoCarro { get; set; }
     }

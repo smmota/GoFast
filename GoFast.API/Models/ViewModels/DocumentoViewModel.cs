@@ -10,7 +10,7 @@ namespace GoFast.API.Models.ViewModels
 
         public string Numero { get; set; }
 
-        public string Expedicao { get; set; }
+        public DateTime Expedicao { get; set; }
 
         public Guid BlobId { get; set; }
 
