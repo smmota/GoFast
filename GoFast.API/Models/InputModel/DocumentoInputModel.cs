@@ -14,7 +14,7 @@ namespace GoFast.API.Models.InputModel
         [Required]
         public DateTime Expedicao { get; set; }
 
-        [Required]
-        public Guid IdBlob { get; set; }
+        //[Required]
+        //public Guid IdBlob { get; set; }
     }
 }
