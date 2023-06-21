@@ -4,6 +4,7 @@ using GoFast.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFast.API.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [Migration("20230612142734_adicionandoRelacionamento1")]
+    partial class adicionandoRelacionamento1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +35,14 @@ namespace GoFast.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("IdAzure")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdUsuario")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -40,6 +51,10 @@ namespace GoFast.API.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("base64")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -81,15 +96,15 @@ namespace GoFast.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BlobId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Expedicao")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IdBlob")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Numero")
                         .IsRequired()
@@ -100,8 +115,6 @@ namespace GoFast.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BlobId");
 
                     b.ToTable("Documentos");
 
@@ -234,17 +247,6 @@ namespace GoFast.API.Migrations
                     b.Navigation("DocumentoCarro");
                 });
 
-            modelBuilder.Entity("GoFast.API.Models.Documento", b =>
-                {
-                    b.HasOne("GoFast.API.Models.BlobStorage", "BlobStorage")
-                        .WithMany("Documentos")
-                        .HasForeignKey("BlobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BlobStorage");
-                });
-
             modelBuilder.Entity("GoFast.API.Models.Motorista", b =>
                 {
                     b.HasOne("GoFast.API.Models.Carro", "Carro")
@@ -262,11 +264,6 @@ namespace GoFast.API.Migrations
                     b.Navigation("Carro");
 
                     b.Navigation("Endereco");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.BlobStorage", b =>
-                {
-                    b.Navigation("Documentos");
                 });
 #pragma warning restore 612, 618
         }
