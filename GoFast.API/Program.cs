@@ -323,7 +323,7 @@ app.MapGet("/api/Imagem/GetById", async (IBlobStorageRepository blobStorageRepos
 
     return Results.NoContent();
 })
-    .RequireAuthorization()
+    //.RequireAuthorization()
     .WithName("GetImageById")
     .WithTags("Imagem");
 
@@ -340,7 +340,7 @@ app.MapGet("/api/Motorista/GetAll", async (IMotoristaRepository motoristaReposit
 
     return Results.NoContent();
 })
-    .RequireAuthorization()
+    //.RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaRepository, IMapper _mapper, Guid idMotorista) =>
@@ -352,7 +352,7 @@ app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaReposi
 
     return Results.NoContent();
 })
-    .RequireAuthorization()
+    //.RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaInputModel model) =>
@@ -399,14 +399,30 @@ app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRe
     motoristaDM.Id = Guid.NewGuid();
     motoristaDM.Carro.DocumentoCarro.BlobStorage = blobStorage;
 
-    await motoristaRepository.Add(motoristaDM);
-
-    return Results.Ok(new
+    try
     {
-        motoristaDM.Id
-    });
+        await motoristaRepository.Add(motoristaDM);
+        
+        return Results.Ok(new
+        {
+            motoristaDM.Id
+        });
+    }
+    catch (Exception ex)
+    {
+
+        blobStorage = await blobStorageRepository.GetById(blobStorage.Id);
+
+        await blobStorageService.DeleteImage(blobStorage);
+        await blobStorageRepository.Remove(blobStorage.Id);
+
+        return Results.BadRequest(new
+        {
+            message = $"Erro ao cadastrar o motorista. {ex.Message}"
+        });
+    }
 })
-    .RequireAuthorization()
+    //.RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapDelete("/api/Motorista/Delete", async (IMotoristaRepository motoristaRepository, Guid idMotorista) =>
@@ -418,7 +434,7 @@ app.MapDelete("/api/Motorista/Delete", async (IMotoristaRepository motoristaRepo
         message = "Motorista excluído com sucesso!"
     });
 })
-    .RequireAuthorization()
+    //.RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapPut("/api/Motorista/Update", async (IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaViewModel model) =>
