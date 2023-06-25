@@ -11,6 +11,7 @@ using GoFast.API.Models.InputModel;
 using GoFast.API.Models.ViewModels;
 using GoFast.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -20,9 +21,11 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("database");
+var connectionStringIdentity = builder.Configuration.GetConnectionString("identityDB");
 var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
 builder.Services.AddDbContext<SqlContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionStringIdentity));
 
 builder.Services.DependencyMap();
 
@@ -38,12 +41,19 @@ builder.Services.AddAuthentication(options =>
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -115,65 +125,137 @@ app.UseAuthorization();
 
 #region Usuario
 
-app.MapPost("/api/Usuario/Create", async (IUsuarioRepository usuarioRepository, IHashService hashService, UsuarioViewModel model) =>
+app.MapPost("/api/Usuario/Create", async (UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, UsuarioViewModel model) =>
 {
-    if (await usuarioRepository.VerificaSeUsuarioExiste(model.LoginUser))
-        return Results.Ok(new
-        {
-            message = "E-mail informado já está cadastrado!"
-        });
+    var user = new ApplicationUser { UserName = model.LoginUser, Email = model.LoginUser, NormalizedUserName = model.Nome };
+    var result = await userManager.CreateAsync(user, model.Senha);
 
-    Guid guid = Guid.NewGuid();
-
-    Usuario usuario = new Usuario()
+    if (!result.Succeeded)
     {
-        Id = guid,
-        Nome = model.Nome,
-        LoginUser = model.LoginUser,
-        Senha = hashService.CriptografarSenha(model.Senha + guid.ToString()),
-        Ativo = true,
-        Role = "user"
-    };
+        string erros = string.Empty;
 
-    await usuarioRepository.Add(usuario);
+        foreach (var erro in result.Errors)
+        {
+            erros = erros + erro.Description + "\r\n";
+        }
+
+        return Results.BadRequest(new
+        {
+            message = erros
+        });
+    }
 
     return Results.Ok(new
     {
-        message = $"Usuario {usuario.Nome} cadastrado com sucesso!"
+        message = $"Usuario {model.LoginUser} cadastrado com sucesso!"
     });
 })
     .AllowAnonymous()
     .WithTags("Usuario");
 
-app.MapPut("/api/Usuario/UpdateStatusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
-{
-    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
 
-    if (usuario == null)
-        return Results.NotFound(new
-        {
-            message = "Usuário não cadastrado!"
-        });
+//app.MapPost("/api/Usuario/Create", async (IUsuarioRepository usuarioRepository, IHashService hashService, UsuarioViewModel model) =>
+//{
+//    if (await usuarioRepository.VerificaSeUsuarioExiste(model.LoginUser))
+//        return Results.Ok(new
+//        {
+//            message = "E-mail informado já está cadastrado!"
+//        });
 
-    usuario.Ativo = model.Ativo;
+//    Guid guid = Guid.NewGuid();
 
-    await usuarioRepository.Update(usuario);
+//    Usuario usuario = new Usuario()
+//    {
+//        Id = guid,
+//        Nome = model.Nome,
+//        LoginUser = model.LoginUser,
+//        Senha = hashService.CriptografarSenha(model.Senha + guid.ToString()),
+//        Ativo = true,
+//        Role = "user"
+//    };
 
-    if (!usuario.Ativo)
-        return Results.Ok(new
-        {
-            message = "Usuário bloqueado com sucesso!"
-        });
-    else
-        return Results.Ok(new
-        {
-            message = "Usuário desbloqueado com sucesso!"
-        });
-})
-    .RequireAuthorization("Admin")
-    .WithTags("Usuario");
+//    await usuarioRepository.Add(usuario);
 
-app.MapPost("/api/Usuario/login", async (IUsuarioRepository usuarioRepository, IHashService hashService, LoginViewModel model) =>
+//    return Results.Ok(new
+//    {
+//        message = $"Usuario {usuario.Nome} cadastrado com sucesso!"
+//    });
+//})
+//    .AllowAnonymous()
+//    .WithTags("Usuario");
+
+//app.MapPut("/api/Usuario/UpdateStatusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
+//{
+//    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
+
+//    if (usuario == null)
+//        return Results.NotFound(new
+//        {
+//            message = "Usuário não cadastrado!"
+//        });
+
+//    usuario.Ativo = model.Ativo;
+
+//    await usuarioRepository.Update(usuario);
+
+//    if (!usuario.Ativo)
+//        return Results.Ok(new
+//        {
+//            message = "Usuário bloqueado com sucesso!"
+//        });
+//    else
+//        return Results.Ok(new
+//        {
+//            message = "Usuário desbloqueado com sucesso!"
+//        });
+//})
+//    .RequireAuthorization("Admin")
+//    .WithTags("Usuario");
+
+//app.MapPost("/api/Usuario/login", async (IUsuarioRepository usuarioRepository, IHashService hashService, LoginViewModel model) =>
+//{
+//    if (string.IsNullOrEmpty(model.LoginUser) || string.IsNullOrEmpty(model.Senha))
+//        return Results.NotFound(new
+//        {
+//            message = "Informe o usuário e senha!"
+//        });
+
+//    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
+
+//    if (usuario == null)
+//        return Results.NotFound(new
+//        {
+//            message = "Usuário não cadastrado!"
+//        });
+
+//    var senhaDigitadaCripto = hashService.CriptografarSenha(model.Senha + usuario.Id);
+
+//    if (senhaDigitadaCripto != usuario.Senha)
+//        return Results.NotFound(new
+//        {
+//            message = "Usuário ou senha incorreto!"
+//        });
+
+//    if (!usuario.Ativo)
+//        return Results.Ok(new
+//        {
+//            message = "Usuário bloqueado!"
+//        });
+
+//    var token = TokenService.GenerateToken(usuario);
+
+//    usuario.Senha = "";
+
+//    return Results.Ok(new
+//    {
+//        usuario = usuario,
+//        token = token
+//    });
+//})
+//    .AllowAnonymous()
+//    .WithTags("Usuario");
+
+app.MapPost("/api/Usuario/login", async (SignInManager<ApplicationUser> signInManager, LoginViewModel model) =>
 {
     if (string.IsNullOrEmpty(model.LoginUser) || string.IsNullOrEmpty(model.Senha))
         return Results.NotFound(new
@@ -181,36 +263,29 @@ app.MapPost("/api/Usuario/login", async (IUsuarioRepository usuarioRepository, I
             message = "Informe o usuário e senha!"
         });
 
-    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
+    var result = await signInManager.PasswordSignInAsync(model.LoginUser, model.Senha, isPersistent: false, lockoutOnFailure: false);
 
-    if (usuario == null)
+    if (!result.Succeeded)
         return Results.NotFound(new
         {
             message = "Usuário não cadastrado!"
         });
 
-    var senhaDigitadaCripto = hashService.CriptografarSenha(model.Senha + usuario.Id);
-
-    if (senhaDigitadaCripto != usuario.Senha)
-        return Results.NotFound(new
-        {
-            message = "Usuário ou senha incorreto!"
-        });
-
-    if (!usuario.Ativo)
+    if (result.IsLockedOut)
         return Results.Ok(new
         {
             message = "Usuário bloqueado!"
         });
 
-    var token = TokenService.GenerateToken(usuario);
+    if (result.IsNotAllowed)
+        return Results.Unauthorized();
 
-    usuario.Senha = "";
+    var token = TokenService.BuildToken(model);
 
     return Results.Ok(new
     {
-        usuario = usuario,
-        token = token
+        token.Token,
+        token.Expiration
     });
 })
     .AllowAnonymous()
@@ -340,7 +415,7 @@ app.MapGet("/api/Motorista/GetAll", async (IMotoristaRepository motoristaReposit
 
     return Results.NoContent();
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaRepository, IMapper _mapper, Guid idMotorista) =>

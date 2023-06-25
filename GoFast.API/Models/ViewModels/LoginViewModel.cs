@@ -2,7 +2,7 @@
 {
     public class LoginViewModel
     {
-        public string LoginUser { get; set; }
-        public string Senha { get; set; }
+        public string? LoginUser { get; set; }
+        public string? Senha { get; set; }
     }
 }

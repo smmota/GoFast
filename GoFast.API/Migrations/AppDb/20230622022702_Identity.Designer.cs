@@ -4,16 +4,19 @@ using GoFast.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GoFast.API.Migrations
+namespace GoFast.API.Migrations.AppDb
 {
-    [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20230622022702_Identity")]
+    partial class Identity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,197 +88,6 @@ namespace GoFast.API.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.BlobStorage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Container")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BlobStorage");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Carro", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("AnoFabricacao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("IdDocumentoRefCarro")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Modelo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Placa")
-                        .IsRequired()
-                        .HasMaxLength(7)
-                        .HasColumnType("nvarchar(7)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdDocumentoRefCarro");
-
-                    b.ToTable("Carros");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Documento", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BlobId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Expedicao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Numero")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<int>("TipoDocumento")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BlobId");
-
-                    b.ToTable("Documentos");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Documento");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Endereco", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Bairro")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CEP")
-                        .IsRequired()
-                        .HasMaxLength(9)
-                        .HasColumnType("nvarchar(9)");
-
-                    b.Property<string>("Cidade")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Complemento")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Numero")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Rua")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Endereco");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Motorista", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid>("IdCarroRefMotorista")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IdEnderecoRefMotorista")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Nascimento")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdCarroRefMotorista");
-
-                    b.HasIndex("IdEnderecoRefMotorista");
-
-                    b.ToTable("Motorista");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Usuario", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LoginUser")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Senha")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Usuario");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -411,57 +223,6 @@ namespace GoFast.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("GoFast.API.Models.DocumentoCarro", b =>
-                {
-                    b.HasBaseType("GoFast.API.Models.Documento");
-
-                    b.Property<DateTime>("Renovacao")
-                        .HasColumnType("datetime2");
-
-                    b.HasDiscriminator().HasValue("DocumentoCarro");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Carro", b =>
-                {
-                    b.HasOne("GoFast.API.Models.DocumentoCarro", "DocumentoCarro")
-                        .WithMany()
-                        .HasForeignKey("IdDocumentoRefCarro")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DocumentoCarro");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Documento", b =>
-                {
-                    b.HasOne("GoFast.API.Models.BlobStorage", "BlobStorage")
-                        .WithMany("Documentos")
-                        .HasForeignKey("BlobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BlobStorage");
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.Motorista", b =>
-                {
-                    b.HasOne("GoFast.API.Models.Carro", "Carro")
-                        .WithMany()
-                        .HasForeignKey("IdCarroRefMotorista")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GoFast.API.Models.Endereco", "Endereco")
-                        .WithMany()
-                        .HasForeignKey("IdEnderecoRefMotorista")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Carro");
-
-                    b.Navigation("Endereco");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -511,11 +272,6 @@ namespace GoFast.API.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("GoFast.API.Models.BlobStorage", b =>
-                {
-                    b.Navigation("Documentos");
                 });
 #pragma warning restore 612, 618
         }
