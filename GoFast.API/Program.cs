@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,154 +128,80 @@ app.UseAuthorization();
 
 app.MapPost("/api/Usuario/Create", async (UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, UsuarioViewModel model) =>
 {
-    var user = new ApplicationUser { UserName = model.LoginUser, Email = model.LoginUser, NormalizedUserName = model.Nome };
-    var result = await userManager.CreateAsync(user, model.Senha);
+    List<string> erros = new List<string>();
 
-    if (!result.Succeeded)
+    if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
     {
-        string erros = string.Empty;
-
-        foreach (var erro in result.Errors)
-        {
-            erros = erros + erro.Description + "\r\n";
-        }
+        erros.Add("Informe o usuário e senha!");
 
         return Results.BadRequest(new
         {
-            message = erros
+            Successful = false,
+            Errors = erros
+        });
+    }
+
+    if(model.Password != model.ConfirmPassword)
+    {
+        erros.Add("As senhas informadas não conferem!");
+
+        return Results.BadRequest(new
+        {
+            Successful = false,
+            Errors = erros
+        });
+    }
+
+    var user = new ApplicationUser { UserName = model.Email, Email = model.Email, NormalizedUserName = model.Email };
+    var result = await userManager.CreateAsync(user, model.Password);
+
+    if (!result.Succeeded)
+    {
+        foreach (var erro in result.Errors)
+            erros.Add(erro.Description);
+
+        return Results.BadRequest(new
+        {
+            Successful = false,
+            Errors = erros
         });
     }
 
     return Results.Ok(new
     {
-        message = $"Usuario {model.LoginUser} cadastrado com sucesso!"
+        Successful = true,
+        Errors = $"Usuario {model.Email} cadastrado com sucesso!"
     });
 })
     .AllowAnonymous()
     .WithTags("Usuario");
 
-
-//app.MapPost("/api/Usuario/Create", async (IUsuarioRepository usuarioRepository, IHashService hashService, UsuarioViewModel model) =>
-//{
-//    if (await usuarioRepository.VerificaSeUsuarioExiste(model.LoginUser))
-//        return Results.Ok(new
-//        {
-//            message = "E-mail informado já está cadastrado!"
-//        });
-
-//    Guid guid = Guid.NewGuid();
-
-//    Usuario usuario = new Usuario()
-//    {
-//        Id = guid,
-//        Nome = model.Nome,
-//        LoginUser = model.LoginUser,
-//        Senha = hashService.CriptografarSenha(model.Senha + guid.ToString()),
-//        Ativo = true,
-//        Role = "user"
-//    };
-
-//    await usuarioRepository.Add(usuario);
-
-//    return Results.Ok(new
-//    {
-//        message = $"Usuario {usuario.Nome} cadastrado com sucesso!"
-//    });
-//})
-//    .AllowAnonymous()
-//    .WithTags("Usuario");
-
-//app.MapPut("/api/Usuario/UpdateStatusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
-//{
-//    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
-
-//    if (usuario == null)
-//        return Results.NotFound(new
-//        {
-//            message = "Usuário não cadastrado!"
-//        });
-
-//    usuario.Ativo = model.Ativo;
-
-//    await usuarioRepository.Update(usuario);
-
-//    if (!usuario.Ativo)
-//        return Results.Ok(new
-//        {
-//            message = "Usuário bloqueado com sucesso!"
-//        });
-//    else
-//        return Results.Ok(new
-//        {
-//            message = "Usuário desbloqueado com sucesso!"
-//        });
-//})
-//    .RequireAuthorization("Admin")
-//    .WithTags("Usuario");
-
-//app.MapPost("/api/Usuario/login", async (IUsuarioRepository usuarioRepository, IHashService hashService, LoginViewModel model) =>
-//{
-//    if (string.IsNullOrEmpty(model.LoginUser) || string.IsNullOrEmpty(model.Senha))
-//        return Results.NotFound(new
-//        {
-//            message = "Informe o usuário e senha!"
-//        });
-
-//    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
-
-//    if (usuario == null)
-//        return Results.NotFound(new
-//        {
-//            message = "Usuário não cadastrado!"
-//        });
-
-//    var senhaDigitadaCripto = hashService.CriptografarSenha(model.Senha + usuario.Id);
-
-//    if (senhaDigitadaCripto != usuario.Senha)
-//        return Results.NotFound(new
-//        {
-//            message = "Usuário ou senha incorreto!"
-//        });
-
-//    if (!usuario.Ativo)
-//        return Results.Ok(new
-//        {
-//            message = "Usuário bloqueado!"
-//        });
-
-//    var token = TokenService.GenerateToken(usuario);
-
-//    usuario.Senha = "";
-
-//    return Results.Ok(new
-//    {
-//        usuario = usuario,
-//        token = token
-//    });
-//})
-//    .AllowAnonymous()
-//    .WithTags("Usuario");
-
 app.MapPost("/api/Usuario/login", async (SignInManager<ApplicationUser> signInManager, LoginViewModel model) =>
 {
     if (string.IsNullOrEmpty(model.LoginUser) || string.IsNullOrEmpty(model.Senha))
-        return Results.NotFound(new
+        return Results.NotFound(new LoginErroViewModel
         {
-            message = "Informe o usuário e senha!"
+            Error = "Informe o usuário e senha!"
         });
 
     var result = await signInManager.PasswordSignInAsync(model.LoginUser, model.Senha, isPersistent: false, lockoutOnFailure: false);
 
+    //if (!result.Succeeded)
+    //    return Results.NotFound(new
+    //    {
+    //        message = "Usuário ou senha inválido!"
+    //    });
+
     if (!result.Succeeded)
-        return Results.NotFound(new
+        return Results.NotFound(new LoginErroViewModel
         {
-            message = "Usuário não cadastrado!"
+            Error = "Usuário ou senha inválido!"
         });
 
     if (result.IsLockedOut)
-        return Results.Ok(new
+        return Results.Ok(new LoginErroViewModel
         {
-            message = "Usuário bloqueado!"
+            Error = "Usuário bloqueado!"
         });
 
     if (result.IsNotAllowed)
