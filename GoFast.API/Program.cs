@@ -13,6 +13,7 @@ using GoFast.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
@@ -108,6 +109,12 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddAzureClients(clientBuilder =>
+{
+    clientBuilder.AddBlobServiceClient(builder.Configuration["ConnectionStrings:connBlobStorage:blob"], preferMsi: true);
+    clientBuilder.AddQueueServiceClient(builder.Configuration["ConnectionStrings:connBlobStorage:queue"], preferMsi: true);
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -185,12 +192,6 @@ app.MapPost("/api/Usuario/login", async (SignInManager<ApplicationUser> signInMa
         });
 
     var result = await signInManager.PasswordSignInAsync(model.LoginUser, model.Senha, isPersistent: false, lockoutOnFailure: false);
-
-    //if (!result.Succeeded)
-    //    return Results.NotFound(new
-    //    {
-    //        message = "Usuário ou senha inválido!"
-    //    });
 
     if (!result.Succeeded)
         return Results.NotFound(new LoginErroViewModel
@@ -325,7 +326,7 @@ app.MapGet("/api/Imagem/GetById", async (IBlobStorageRepository blobStorageRepos
 
     return Results.NoContent();
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithName("GetImageById")
     .WithTags("Imagem");
 
@@ -354,7 +355,7 @@ app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaReposi
 
     return Results.NoContent();
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaInputModel model) =>
@@ -424,7 +425,7 @@ app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRe
         });
     }
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapDelete("/api/Motorista/Delete", async (IMotoristaRepository motoristaRepository, Guid idMotorista) =>
@@ -436,7 +437,7 @@ app.MapDelete("/api/Motorista/Delete", async (IMotoristaRepository motoristaRepo
         message = "Motorista excluído com sucesso!"
     });
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapPut("/api/Motorista/Update", async (IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaViewModel model) =>
