@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,14 +97,22 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+builder.Services.AddAzureClients(clientBuilder =>
+{
+    clientBuilder.AddBlobServiceClient(builder.Configuration["ConnectionStrings:connBlobStorage:blob"], preferMsi: true);
+    clientBuilder.AddQueueServiceClient(builder.Configuration["ConnectionStrings:connBlobStorage:queue"], preferMsi: true);
+});
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors();
 
@@ -145,33 +154,33 @@ app.MapPost("/api/Usuario/Create", async (IUsuarioRepository usuarioRepository, 
     .AllowAnonymous()
     .WithTags("Usuario");
 
-app.MapPut("/api/Usuario/UpdateStatusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
-{
-    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
+//app.MapPut("/api/Usuario/UpdateStatusUsuario", async (IUsuarioRepository usuarioRepository, UsuarioStatusViewModel model) =>
+//{
+//    var usuario = await usuarioRepository.GetUsuarioByLogin(model.LoginUser);
 
-    if (usuario == null)
-        return Results.NotFound(new
-        {
-            message = "Usuário não cadastrado!"
-        });
+//    if (usuario == null)
+//        return Results.NotFound(new
+//        {
+//            message = "Usuário não cadastrado!"
+//        });
 
-    usuario.Ativo = model.Ativo;
+//    usuario.Ativo = model.Ativo;
 
-    await usuarioRepository.Update(usuario);
+//    await usuarioRepository.Update(usuario);
 
-    if (!usuario.Ativo)
-        return Results.Ok(new
-        {
-            message = "Usuário bloqueado com sucesso!"
-        });
-    else
-        return Results.Ok(new
-        {
-            message = "Usuário desbloqueado com sucesso!"
-        });
-})
-    .RequireAuthorization("Admin")
-    .WithTags("Usuario");
+//    if (!usuario.Ativo)
+//        return Results.Ok(new
+//        {
+//            message = "Usuário bloqueado com sucesso!"
+//        });
+//    else
+//        return Results.Ok(new
+//        {
+//            message = "Usuário desbloqueado com sucesso!"
+//        });
+//})
+//    .RequireAuthorization("Admin")
+//    .WithTags("Usuario");
 
 app.MapPost("/api/Usuario/login", async (IUsuarioRepository usuarioRepository, IHashService hashService, LoginViewModel model) =>
 {
@@ -233,7 +242,7 @@ app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepos
         var container = "data";
         var blobClient = await blobStorageService.UploadBase64Image(model.Imagem, container);
 
-        if(blobClient == null)
+        if (blobClient == null)
             return Results.BadRequest(new
             {
                 message = "Erro ao fazer upload da imagem."
@@ -276,7 +285,7 @@ app.MapPost("/api/Imagem/Upload", async (IBlobStorageRepository blobStorageRepos
     .RequireAuthorization()
     .WithTags("Imagem");
 
-app.MapPost("/api/Imaggem/Delete", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, DeleteImageViewModel model) =>
+app.MapPost("/api/Imagem/Delete", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, DeleteImageViewModel model) =>
 {
     if (model.IdBlob == null)
         return Results.BadRequest(new
@@ -323,7 +332,7 @@ app.MapGet("/api/Imagem/GetById", async (IBlobStorageRepository blobStorageRepos
 
     return Results.NoContent();
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithName("GetImageById")
     .WithTags("Imagem");
 
@@ -340,7 +349,7 @@ app.MapGet("/api/Motorista/GetAll", async (IMotoristaRepository motoristaReposit
 
     return Results.NoContent();
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaRepository, IMapper _mapper, Guid idMotorista) =>
@@ -352,7 +361,7 @@ app.MapGet("/api/Motorista/GetById", async (IMotoristaRepository motoristaReposi
 
     return Results.NoContent();
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRepository, IBlobStorageService blobStorageService, IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaInputModel model) =>
@@ -422,7 +431,7 @@ app.MapPost("/api/Motorista/Create", async (IBlobStorageRepository blobStorageRe
         });
     }
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapDelete("/api/Motorista/Delete", async (IMotoristaRepository motoristaRepository, Guid idMotorista) =>
@@ -434,7 +443,7 @@ app.MapDelete("/api/Motorista/Delete", async (IMotoristaRepository motoristaRepo
         message = "Motorista excluído com sucesso!"
     });
 })
-    //.RequireAuthorization()
+    .RequireAuthorization()
     .WithTags("Motorista");
 
 app.MapPut("/api/Motorista/Update", async (IMotoristaRepository motoristaRepository, IMapper _mapper, MotoristaViewModel model) =>
